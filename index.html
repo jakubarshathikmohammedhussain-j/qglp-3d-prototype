@@ -309,6 +309,34 @@
             pointer-events: none;
             z-index: 10;
         }
+                /* --- RESPONSIVE MOBILE LAYOUT --- */
+        @media (max-width: 768px) {
+            #ui-stage {
+                padding: 15px;
+                align-items: flex-end; /* Push panel to the bottom */
+                padding-bottom: 90px; /* Leave space for the nav controls */
+            }
+            .layer-panel {
+                width: 100%;
+                max-height: 45vh; /* Prevent panel from covering the 3D model */
+                padding: 20px;
+            }
+            header {
+                padding: 15px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .audio-toggle {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+            h1 { font-size: 18px; margin-bottom: 10px; }
+            p, li { font-size: 12px; margin-bottom: 10px; }
+            .equation-badge { font-size: 14px; padding: 8px; margin: 10px 0; }
+        }
+        
     </style>
 
     <!-- Dependencies -->
@@ -588,8 +616,18 @@
         scene.fog = new THREE.FogExp2(0x030712, 0.02);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(13, 6, 13);
-        camera.setViewOffset(window.innerWidth, window.innerHeight, -window.innerWidth * 0.14, 0, window.innerWidth, window.innerHeight);
+        
+        // Helper function to detect screen size
+        const isMobile = () => window.innerWidth <= 768;
+        
+        // Push camera further back and center it if on mobile
+        if (isMobile()) {
+            camera.position.set(22, 10, 22);
+        } else {
+            camera.position.set(13, 6, 13);
+            camera.setViewOffset(window.innerWidth, window.innerHeight, -window.innerWidth * 0.14, 0, window.innerWidth, window.innerHeight);
+        }
+
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -793,14 +831,15 @@
             });
         }
 
-        function setStage(index) {
+                function setStage(index) {
             activeStep = index;
             playPneumaticSFX(activeStep);
             updateStepUI(activeStep);
 
+            const m = isMobile(); // Check if mobile for camera positions
+
             // Cinematic Transformations per Layer
             if (activeStep === 0) {
-                // Fully Assembled Module
                 gsap.to(topShell.position, { y: 0, duration: 1.4, ease: "power3.inOut" });
                 gsap.to(botShell.position, { y: 0, duration: 1.4, ease: "power3.inOut" });
                 gsap.to(rearCap.position, { x: -5.3, duration: 1.4, ease: "power3.inOut" });
@@ -808,39 +847,35 @@
                 gsap.to(chassisGroup.position, { y: 0, duration: 1.2, ease: "power2.inOut" });
                 gsap.to(substrateGroup.position, { y: 0, duration: 1.2, ease: "power2.inOut" });
                 gsap.to(coreLaserGroup.position, { y: 0, duration: 1.2, ease: "power2.inOut" });
-                gsap.to(camera.position, { x: 13, y: 6, z: 13, duration: 1.8, ease: "power2.inOut" });
+                gsap.to(camera.position, { x: m?22:13, y: m?10:6, z: m?22:13, duration: 1.8, ease: "power2.inOut" });
             } 
             else if (activeStep === 1) {
-                // Paradigm Shift: Unlocking outer shell slightly
                 gsap.to(topShell.position, { y: 2.2, duration: 1.3, ease: "power2.out" });
                 gsap.to(botShell.position, { y: -2.2, duration: 1.3, ease: "power2.out" });
                 gsap.to(rearCap.position, { x: -7.0, duration: 1.3, ease: "power2.out" });
                 gsap.to(opticalPort.position, { x: 7.0, duration: 1.3, ease: "power2.out" });
-                gsap.to(camera.position, { x: 11, y: 4, z: 11, duration: 1.4, ease: "power2.inOut" });
+                gsap.to(camera.position, { x: m?18:11, y: m?8:4, z: m?18:11, duration: 1.4, ease: "power2.inOut" });
             } 
             else if (activeStep === 2) {
-                // Physical Hardware: Full Exploded Assembly View
                 gsap.to(topShell.position, { y: 6.5, duration: 1.5, ease: "power3.out" });
                 gsap.to(botShell.position, { y: -6.5, duration: 1.5, ease: "power3.out" });
                 gsap.to(rearCap.position, { x: -9.5, duration: 1.5, ease: "power3.out" });
                 gsap.to(opticalPort.position, { x: 9.5, duration: 1.5, ease: "power3.out" });
                 gsap.to(chassisGroup.position, { y: 2.0, duration: 1.3, ease: "power2.out" });
                 gsap.to(substrateGroup.position, { y: -1.0, duration: 1.3, ease: "power2.out" });
-                gsap.to(camera.position, { x: 12, y: 7, z: 10, duration: 1.5, ease: "power2.inOut" });
+                gsap.to(camera.position, { x: m?20:12, y: m?12:7, z: m?16:10, duration: 1.5, ease: "power2.inOut" });
             } 
             else if (activeStep === 3) {
-                // Protocol Mechanics: Macro focus into Quantum Core
                 gsap.to(topShell.position, { y: 9, duration: 1.2 });
                 gsap.to(botShell.position, { y: -9, duration: 1.2 });
                 gsap.to(rearCap.position, { x: -12, duration: 1.2 });
                 gsap.to(opticalPort.position, { x: 12, duration: 1.2 });
-                gsap.to(camera.position, { x: 3.5, y: 1.0, z: 4.5, duration: 1.8, ease: "power3.inOut" });
+                gsap.to(camera.position, { x: m?6:3.5, y: m?2:1.0, z: m?8:4.5, duration: 1.8, ease: "power3.inOut" });
             } 
             else if (activeStep === 4) {
-                // Enterprise Strategy: Distant architectural overview
                 gsap.to(topShell.position, { y: 3.5, duration: 1.4 });
                 gsap.to(botShell.position, { y: -3.5, duration: 1.4 });
-                gsap.to(camera.position, { x: 14, y: 9, z: 14, duration: 2.0, ease: "power2.inOut" });
+                gsap.to(camera.position, { x: m?24:14, y: m?15:9, z: m?24:14, duration: 2.0, ease: "power2.inOut" });
             }
         }
 
@@ -921,13 +956,20 @@
         }
         renderLoop();
 
-        // Responsive Resize
+                // Responsive Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
-            camera.setViewOffset(window.innerWidth, window.innerHeight, -window.innerWidth * 0.14, 0, window.innerWidth, window.innerHeight);
+            
+            if (isMobile()) {
+                camera.clearViewOffset();
+            } else {
+                camera.setViewOffset(window.innerWidth, window.innerHeight, -window.innerWidth * 0.14, 0, window.innerWidth, window.innerHeight);
+            }
+            
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
     </script>
 </body>
 </html>
